@@ -10,26 +10,28 @@ import {
 } from '@nestjs/common';
 import { BookService } from './book.service';
 import { Book } from './book.schema';
-import { CreateBookDto } from './create-book.dto';
-import { UpdateBookDto } from './update-book.dto';
+import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
 import { ParsedUrlQuery } from 'node:querystring';
+import { BookResponseDto } from './dto/book-response.dto';
+import { PaginatedDto } from './dto/paginated.dto';
 
 @Controller('books')
 export class BookController {
   constructor(private bookService: BookService) {}
 
   @Get()
-  async getAllBooks(
-    @Query()
-    query: ParsedUrlQuery,
-  ): Promise<Array<Book>> {
-    return this.bookService.findAll(query);
+  async findAll(
+    @Query('page') page,
+    @Query('limit') limit,
+  ): Promise<PaginatedDto<BookResponseDto>> {
+    return this.bookService.findAll(page, limit);
   }
 
   @Post()
   async createBook(
     @Body()
-    book: CreateBookDto,
+    book: BookResponseDto,
   ): Promise<Book> {
     return this.bookService.create(book);
   }
@@ -39,24 +41,24 @@ export class BookController {
     @Param('id')
     id: string,
   ): Promise<Book> {
-    return this.bookService.findById(id);
+    return this.bookService.findOne(id);
   }
 
-  @Put(':id')
-  async updateBook(
-    @Param('id')
-    id: string,
-    @Body()
-    book: UpdateBookDto,
-  ): Promise<Book> {
-    return this.bookService.updateById(id, book);
-  }
+  // @Put(':id')
+  // async updateBook(
+  //   @Param('id')
+  //   id: string,
+  //   @Body()
+  //   book: UpdateBookDto,
+  // ): Promise<Book> {
+  //   return this.bookService.updateById(id, book);
+  // }
 
   @Delete(':id')
   async deleteBook(
     @Param('id')
     id: string,
-  ): Promise<Book> {
-    return this.bookService.deleteById(id);
+  ): Promise<void> {
+    return this.bookService.delete(id);
   }
 }
